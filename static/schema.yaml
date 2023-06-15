@@ -1,0 +1,457 @@
+openapi: 3.0.3
+info:
+  title: Rezerwowy API
+  version: 0.0.1
+  description: Your project description
+paths:
+  /reservation/:
+    get:
+      operationId: reservation_list
+      description: ViewSet for users to view make, and manage their reservations.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - reservation
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReservationList'
+          description: ''
+  /reservation/{id}/:
+    get:
+      operationId: reservation_retrieve
+      description: ViewSet for users to view make, and manage their reservations.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reservation
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+  /reservation/{id}/cancel/:
+    put:
+      operationId: reservation_cancel_update
+      description: |-
+        Cancel a reservation. (NOT IMPLEMENTED)
+
+        NOT IMPLEMENTED:
+        Only possible if the reservation is Active
+        and the user is the owner of the reservation.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+  /reservation/{id}/reserve/:
+    post:
+      operationId: reservation_reserve_create
+      description: |-
+        Reserve a table.
+
+        NOT IMPLEMENTED:
+        Not allowed if the table is already reserved in this time.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+  /reservation/list_active/:
+    get:
+      operationId: reservation_list_active_retrieve
+      description: Get all active reservations of the user.
+      tags:
+      - reservation
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+  /restaurant/:
+    get:
+      operationId: restaurant_list
+      description: Get a list of all restaurants.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - restaurant
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRestaurantDetailList'
+          description: ''
+  /restaurant/{id}/:
+    get:
+      operationId: restaurant_retrieve
+      description: Get details for a restaurant.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - restaurant
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestaurantDetail'
+          description: ''
+  /restaurant/{id}/tables/:
+    get:
+      operationId: restaurant_tables_list
+      description: View all tables of the input restaurant.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - restaurant
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTableList'
+          description: ''
+  /table/{id}/:
+    get:
+      operationId: table_retrieve
+      description: |-
+        API endpoint to get details for a table.
+
+        Allows to view the Active reservations for the table.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - table
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDetail'
+          description: ''
+  /teapot/:
+    get:
+      operationId: teapot_retrieve
+      description: Teapot
+      tags:
+      - teapot
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    PaginatedReservationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reservation'
+    PaginatedRestaurantDetailList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestaurantDetail'
+    PaginatedTableList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Table'
+    PublicReservation:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+      required:
+      - end
+      - start
+    Reservation:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        table:
+          type: string
+          format: uri
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        creation_date:
+          type: string
+          format: date-time
+          readOnly: true
+        state:
+          type: string
+          readOnly: true
+      required:
+      - creation_date
+      - end
+      - id
+      - start
+      - state
+      - table
+      - url
+    RestaurantDetail:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        layout:
+          type: string
+          format: uri
+        description:
+          type: string
+          maxLength: 100
+        opening_hours:
+          type: string
+          maxLength: 100
+        address:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - layout
+      - name
+      - url
+    Table:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        capacity:
+          type: integer
+        position_x:
+          type: integer
+        position_y:
+          type: integer
+      required:
+      - id
+      - url
+    TableDetail:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        restaurant:
+          type: string
+          format: uri
+        capacity:
+          type: integer
+        position_x:
+          type: integer
+        position_y:
+          type: integer
+        reservations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicReservation'
+          readOnly: true
+      required:
+      - id
+      - reservations
+      - restaurant
+      - url
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
