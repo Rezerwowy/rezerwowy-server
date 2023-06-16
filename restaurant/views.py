@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 # from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
+from drf_spectacular.types import OpenApiTypes
 
 from .models import Restaurant, Table, Reservation
 from .serializers import RestaurantSerializer, RestaurantDetailSerializer, TableSerializer, TableDetailSerializer, \
@@ -35,14 +37,6 @@ class TableListView(generics.ListAPIView):
     def get_queryset(self):
         return Table.objects.filter(restaurant_id=self.kwargs["pk"])
 
-    # def get(self, request, pk=None):
-    #     if not Restaurant.objects.filter(id=pk).exists():
-    #         return Response("Restaurant does not exist", status=status.HTTP_404_NOT_FOUND)
-    #
-    #     queryset = Table.objects.filter(restaurant_id=pk)
-    #     serializer = self.serializer_class(queryset, many=True, context={"request": request})
-    #     return Response(serializer.data)
-
 
 class TableDetailView(generics.RetrieveAPIView):
     """
@@ -68,6 +62,10 @@ class ReservationViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return Reservation.objects.filter(customer=self.request.user.customer)
 
+    # GET Operations
+    @extend_schema(
+        operation_id="reservation_list_active",
+    )
     @action(detail=False, methods=["get"], name="List active reservations")
     def list_active(self, request):
         """
@@ -75,10 +73,14 @@ class ReservationViewSet(mixins.ListModelMixin,
 
         """
         queryset = self.get_queryset().filter(state=Reservation.State.ACTIVE)
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True, context={"request": request})
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"], name="Reserve Table")
+    # Modifying Operations
+    @extend_schema(
+        operation_id="make_reservation",
+    )
+    @action(detail=False, methods=["post"], name="Reserve Table")
     def reserve(self, request):
         """
         Reserve a table.
@@ -93,7 +95,10 @@ class ReservationViewSet(mixins.ListModelMixin,
         serializer.save(customer=self.request.user.customer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["put"], name="Cancel Reservation")
+    @extend_schema(
+        operation_id="reservation_cancel",
+    )
+    @action(detail=True, methods=["delete"], name="Cancel Reservation")
     def cancel(self, request, pk=None, format=None):
         """
         Cancel a reservation. (NOT IMPLEMENTED)
@@ -113,6 +118,12 @@ class TeapotView(APIView):
     Teapot
     """
     permission_classes = [permissions.AllowAny]
+    serializer_class = None
 
+    @extend_schema(
+        operation_id="teapot",
+        request=None,
+        responses={418: OpenApiTypes.STR},
+    )
     def get(self, request, format=None):
         return Response("I'm a teapot", status=status.HTTP_418_IM_A_TEAPOT)
