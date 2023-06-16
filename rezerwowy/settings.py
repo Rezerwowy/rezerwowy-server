@@ -26,6 +26,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
+}
+
 # REST Settings
 
 REST_FRAMEWORK = {
@@ -35,9 +40,9 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        # "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
@@ -50,6 +55,12 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.0.1",
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
+
+    "OAUTH2_FLOWS": [],
+    "OAUTH2_AUTHORIZATION_URL": "http://127.0.0.1:8000/api/oauth/authorize/",
+    "OAUTH2_TOKEN_URL": "http://127.0.0.1:8000/api/oauth/token/",
+    "OAUTH2_REFRESH_URL": None,
+    "OAUTH2_SCOPES": None,
 }
 
 # Application definition
@@ -63,6 +74,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Utility
     "rest_framework",
+    "oauth2_provider",
     "drf_spectacular",
     # App
     "restaurant",
