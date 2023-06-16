@@ -1,7 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
-
-from user.models import Customer
 
 
 class Restaurant(models.Model):
@@ -35,7 +34,7 @@ class Reservation(models.Model):
         CANCELLED = "CN", _("Cancelled")
 
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
     start = models.DateTimeField()
     end = models.DateTimeField()
     creation_date = models.DateTimeField(auto_now_add=True)

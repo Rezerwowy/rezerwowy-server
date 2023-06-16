@@ -50,8 +50,8 @@ paths:
                 $ref: '#/components/schemas/Reservation'
           description: ''
   /reservation/{id}/cancel/:
-    put:
-      operationId: reservation_cancel_update
+    delete:
+      operationId: reservation_cancel
       description: |-
         Cancel a reservation. (NOT IMPLEMENTED)
 
@@ -66,18 +66,18 @@ paths:
         required: true
       tags:
       - reservation
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Reservation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Reservation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Reservation'
-        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /reservation/list_active/:
+    get:
+      operationId: reservation_list_active
+      description: Get all active reservations of the user.
+      tags:
+      - reservation
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -88,20 +88,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Reservation'
           description: ''
-  /reservation/{id}/reserve/:
+  /reservation/reserve/:
     post:
-      operationId: reservation_reserve_create
+      operationId: make_reservation
       description: |-
         Reserve a table.
 
         NOT IMPLEMENTED:
         Not allowed if the table is already reserved in this time.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-        required: true
       tags:
       - reservation
       requestBody:
@@ -116,22 +110,6 @@ paths:
             schema:
               $ref: '#/components/schemas/Reservation'
         required: true
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Reservation'
-          description: ''
-  /reservation/list_active/:
-    get:
-      operationId: reservation_list_active_retrieve
-      description: Get all active reservations of the user.
-      tags:
-      - reservation
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -244,7 +222,7 @@ paths:
           description: ''
   /teapot/:
     get:
-      operationId: teapot_retrieve
+      operationId: teapot
       description: Teapot
       tags:
       - teapot
@@ -253,8 +231,12 @@ paths:
       - basicAuth: []
       - {}
       responses:
-        '200':
-          description: No response body
+        '418':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
 components:
   schemas:
     PaginatedReservationList:

@@ -60,7 +60,7 @@ class ReservationViewSet(mixins.ListModelMixin,
     serializer_class = ReservationSerializer
 
     def get_queryset(self):
-        return Reservation.objects.filter(customer=self.request.user.customer)
+        return Reservation.objects.filter(customer=self.request.user)
 
     # GET Operations
     @extend_schema(
