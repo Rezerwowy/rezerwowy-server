@@ -1,5 +1,8 @@
-from rest_framework import viewsets, permissions, generics, status, mixins
+from datetime import datetime
+
+from rest_framework import viewsets, permissions, generics, status, mixins, response
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 # from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
@@ -9,6 +12,7 @@ from drf_spectacular.types import OpenApiTypes
 from .models import Restaurant, Table, Reservation
 from .serializers import RestaurantSerializer, RestaurantDetailSerializer, TableSerializer, TableDetailSerializer, \
     PublicReservationSerializer, ReservationSerializer
+from .utility import DateTimeRange
 
 
 class RestaurantListView(generics.ListAPIView):
@@ -60,7 +64,7 @@ class ReservationViewSet(mixins.ListModelMixin,
     serializer_class = ReservationSerializer
 
     def get_queryset(self):
-        return Reservation.objects.filter(customer=self.request.user)
+        return Reservation.objects.filter(customer=self.request.user).order_by("-start")
 
     # GET Operations
     @extend_schema(
@@ -79,20 +83,35 @@ class ReservationViewSet(mixins.ListModelMixin,
     # Modifying Operations
     @extend_schema(
         operation_id="make_reservation",
+        responses={
+            status.HTTP_201_CREATED: OpenApiResponse(ReservationSerializer),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                PublicReservationSerializer,
+                description="The table is already reserved in this time.\\\n"  # I love python. What a beautiful escape!
+                            "Returns datetime range of the conflicting reservation.")
+        }
     )
     @action(detail=False, methods=["post"], name="Reserve Table")
     def reserve(self, request):
         """
         Reserve a table.
 
-        NOT IMPLEMENTED:
         Not allowed if the table is already reserved in this time.
 
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid()
-        # TODO Validatate that table is available in this time
-        serializer.save(customer=self.request.user)
+        desired = DateTimeRange(start=serializer.validated_data["start"],
+                                end=serializer.validated_data["end"])
+        # Could finding conflicts be optimized?
+        potentially_conflicting = Reservation.objects.filter(table=serializer.validated_data["table"],
+                                                             state=Reservation.State.ACTIVE)
+
+        for other_reservation in potentially_conflicting:
+            if desired.collides(other_reservation):
+                return Response(PublicReservationSerializer(other_reservation).data, status=status.HTTP_403_FORBIDDEN)
+
+        serializer.save(customer=self.request.user, state=Reservation.State.ACTIVE)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -126,7 +145,9 @@ class TeapotView(APIView):
     @extend_schema(
         operation_id="teapot",
         request=None,
-        responses={418: OpenApiTypes.STR},
+        responses={418: OpenApiResponse(OpenApiTypes.STR, examples=[
+            OpenApiExample(name="teapot", value="I'm a teapot")
+        ])},
     )
     def get(self, request, format=None):
         return Response("I'm a teapot", status=status.HTTP_418_IM_A_TEAPOT)
