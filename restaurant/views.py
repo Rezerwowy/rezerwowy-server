@@ -92,7 +92,7 @@ class ReservationViewSet(mixins.ListModelMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid()
         # TODO Validatate that table is available in this time
-        serializer.save(customer=self.request.user.customer)
+        serializer.save(customer=self.request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -101,15 +101,18 @@ class ReservationViewSet(mixins.ListModelMixin,
     @action(detail=True, methods=["delete"], name="Cancel Reservation")
     def cancel(self, request, pk=None, format=None):
         """
-        Cancel a reservation. (NOT IMPLEMENTED)
+        Cancel a reservation.
 
-        NOT IMPLEMENTED:
         Only possible if the reservation is Active
-        and the user is the owner of the reservation.
 
         """
         reservation = self.get_object()
-        # TODO Implement canceling
+
+        if reservation.state != Reservation.State.ACTIVE:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        reservation.state = Reservation.State.CANCELLED
+        reservation.save()
         return Response(status=status.HTTP_205_RESET_CONTENT)
 
 
