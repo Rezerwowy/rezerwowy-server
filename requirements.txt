@@ -1,4 +1,5 @@
 Django>=4.2.1
+Django-oauth-toolkit>=2.3.0
 djangorestframework>=3.14.0
 drf-spectacular>=0.26.2
 pyYAML>=6.0
