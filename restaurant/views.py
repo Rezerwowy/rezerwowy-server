@@ -27,7 +27,7 @@ class RestaurantDetailView(generics.RetrieveAPIView):
     """
     Get details for a restaurant.
     """
-    queryset = Restaurant.objects.all()
+    queryset = Restaurant.objects.all().order_by("name")
     serializer_class = RestaurantDetailSerializer
 
 
@@ -39,7 +39,7 @@ class TableListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        return Table.objects.filter(restaurant_id=self.kwargs["pk"])
+        return Table.objects.filter(restaurant_id=self.kwargs["pk"]).order_by("id")
 
 
 class TableDetailView(generics.RetrieveAPIView):
@@ -49,7 +49,7 @@ class TableDetailView(generics.RetrieveAPIView):
     Allows to view the Active reservations for the table.
 
     """
-    queryset = Table.objects.all()
+    queryset = Table.objects.all().order_by("id")
     serializer_class = TableDetailSerializer
     permission_classes = [permissions.AllowAny]
 
