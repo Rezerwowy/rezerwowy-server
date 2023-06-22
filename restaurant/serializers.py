@@ -30,7 +30,7 @@ class PublicReservationSerializer(serializers.ModelSerializer):
 
 
 class TableDetailSerializer(serializers.HyperlinkedModelSerializer):
-    reservations = PublicReservationSerializer(many=True, read_only=True, )
+    reservations = PublicReservationSerializer(many=True, read_only=True, source="reservation_set")
 
     class Meta:
         model = Table
